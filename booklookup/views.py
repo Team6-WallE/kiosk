@@ -73,8 +73,8 @@ def search_results(request):
         
     if request.method == "POST":
         keyword_to_search = str(request.POST['searchkey']).lower()
-        api_books = requests.get("https://kiosk-api.vercel.app/Books/?book_name=", keyword_to_search.strip())
-        api_borrows = requests.get("https://kiosk-api.vercel.app/Borrow/", keyword_to_search.strip())
+        api_books = requests.get("https://kiosk-p64o4ozeh-team6-walle.vercel.app/Books/?book_name=", keyword_to_search.strip())
+        api_borrows = requests.get("https://kiosk-p64o4ozeh-team6-walle.vercel.app/Borrow/", keyword_to_search.strip())
         
         try:
             api_book = json.loads(api_books.content)
