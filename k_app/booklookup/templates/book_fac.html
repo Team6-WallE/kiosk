@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{%block content%}
+
+<style>
+    .button-box {
+      text-align: center;
+      margin-top: 20px;
+    }
+</style>
+
+<h1 style="font-size: 60px; color:white;"> Which facility would you like to book? </h1>
+
+<div class="button-box col-lg-12 d-grid gap-2">
+    <a href="#" class="btn btn-primary px-4 py-5" role="button">LOLA</a>
+    <a href="#" class="btn btn-primary px-4 py-5" role="button"> Equipment</a>
+    <a href="#" class="btn btn-primary px-4 py-5" role="button">Rooms</a>
+    <a href="#" class="btn btn-primary px-4 py-5" role="button">Studios</a>
+    <a href="#" class="btn btn-primary px-4 py-5" role="button">Automage</a>
+</div>
+
+<div class="button-box col-lg-12 d-grid gap-1">
+    <a href="{% url 'home' %}" class="btn btn-primary" role="button" style="float: left;">Back</a>
+</div>
+{%endblock%}
