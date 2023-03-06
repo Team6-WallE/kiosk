@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{%block content%}
+
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-areas: "button1 button2";
+        grid-gap: 5px;
+    }
+
+    .grid-item:nth-child(1){
+        grid-area: button1;
+    }
+
+    .grid-item:nth-child(2){
+        grid-area: button2;
+    }
+    
+    .button {
+        width: 100%;
+        height: 50px;
+        background-color: cornflowerblue;
+    }
+    
+</style>
+
+
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+
+<script type="text/javascript">
+
+    var mode_no;
+    function mode(val){
+        
+        if(val === "Assist mode"){
+            mode_no = 1;
+            window.alert("You are setting to Assist Mode");
+        }
+
+        if(val === "Patrol Mode"){
+            mode_no = 2;
+            window.alert("You are setting to Patrol Mode");
+        }
+    }
+
+    const ros = new ROSLIB.Ros({url: "ws://localhost:9090"});
+
+    ros.on("connection", () => {
+        document.getElementById("status").innerHTML = "successful";
+    });
+
+    ros.on("error", (error) => {
+        document.getElementById("status").innerHTML = `errored out (${error})`;
+    });
+
+    ros.on("close", () => {
+        document.getElementById("status").innerHTML = "closed";
+    });
+
+    var topic_listener = new ROSLIB.Topic({
+        ros,
+        name: "/mode_state",
+        messageType: "std_msgs/Int64"
+    });
+
+    setInterval(() => {
+        mode();
+        var msg;
+        msg = mode_no;
+        topic_listener.publish({data: msg});
+        document.getElementById("messages").innerHTML = msg;
+    }, 1000);
+
+
+</script>
+
+<br>
+<h1>Please select kiosk mode</h1>
+<br>
+
+
+<div class="grid-container">
+    <div class="grid-item">
+        <a href="{% url 'assist_home' %}"><input type="button" class="button" value="Assist mode" onclick="mode(this.value)"></a>
+    </div>
+
+    <div class="grid-item">
+        <a href="{% url 'patrol_home' %}"><input type="button" class="button" value="Patrol Mode" onclick="mode(this.value)"></a>
+    </div>
+</div>
+
+<br>
+
+<div class="button-box col-lg-12 d-grid gap-1">
+    <a href="{% url 'logout' %}" class="btn btn-primary" name="logout" role="button" style="float: right;">Logout</a>
+</div>
+
+
+<p>Connection: <span id="status" style="font-weight: bold;">N/A</span></p>
+<p><code>/mode_state</code> messages received: <ul id="messages" style="font-weight: bold;"></ul></p>
+
+{%endblock%}
