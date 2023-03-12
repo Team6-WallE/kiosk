@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{%block content%}
+<style>
+    hr.dashed {
+        border-style: dashed;
+        border-width: 1px;
+    }
+    a {
+      text-decoration: none;
+      display: inline-block;
+      padding: 8px 16px;
+    }
+    a:hover {
+      background-color: darksalmon;
+      color: black;
+    }
+    .previous {
+      background-color: sandybrown;
+      color: black;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      border-radius: 5px;
+    }
+    .button {
+        width: 500px;
+        height: 250px;
+        background-color: tan;
+        font-family: 'Times New Roman', Times, serif;
+        font-size: xx-large;
+        border-radius: 30px;
+    }
+    h1 {
+        font-family: 'Times New Roman', Times, serif;
+        color: black;
+    }
+    .form-control {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: large;
+      width: 550px;
+    }
+    .btn {
+      font-family: 'Times New Roman', Times, serif;
+    }
+    .alert {
+        padding: 20px;
+        background-color: tan;
+        color: black;
+    }
+    img{
+         width: 800px;
+    }
+</style>
+
+<h1> Patrol mode </h1>
+<hr class="dashed">
+
+<div class="row my-4">
+  <div class="col d-flex justify-content-center">
+      <img class="p-1 bg-dark" alt="" id="video" src=""/>
+  </div>
+</div>
+<div class="alert" id="human_detect" style="visibility: hidden;">Human has been detected</div>
+
+<br>
+{% if messages%}
+{% for message in messages%}
+<div class="text-center mt-5">{{message}}</div>
+{%endfor%}
+{%endif%}
+   <form method="post" class="text-center" id="ss">{%csrf_token%}
+   </form>
+
+   {% if img%}
+    <div class="text-center p-5 mt-5 container border shadowsm">
+          <img src="http://127.0.0.1:8000/media/{{img}}" class= "img-fluid">
+    </div>
+   {%endif%}
+
+<hr class="dashed">
+
+<p>Connection: <span id="status" style="font-weight: bold;">N/A</span></p>
+<p><code>/is_detected</code> message sending: <ul id="detected"></ul></p>
+<p><code>/distance_measurement</code> message sending: <ul id="distance"></ul></p>
+
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript">
+comp_IP = "192.168.10.125";
+
+window.onload = function() {
+    video = document.getElementById('video');
+    video.src = "http://" + comp_IP + ":8080/stream?topic=/image_cv&type=mjpeg&quality=80";
+  }
+
+  let human;
+  var flag = 0;
+  const ros = new ROSLIB.Ros({url: "ws://localhost:9090"});
+  ros.on("connection", () => {
+      document.getElementById("status").innerHTML = "successful";
+  });
+
+  ros.on("error", (error) => {
+      document.getElementById("status").innerHTML = `errored out (${error})`;
+  });
+
+  ros.on("close", () => {
+      document.getElementById("status").innerHTML = "closed";
+  });
+
+  var human_subscriber = new ROSLIB.Topic({
+      ros,
+      name: "/is_detected",
+      messageType: "std_msgs/Int64"
+  });
+
+  var distance_subcriber = new ROSLIB.Topic({
+      ros,
+      name: "/distance_measurement",
+      messageType: "std_msgs/Int64"
+  });
+
+  human_subscriber.subscribe(function(message) {
+        human = message.data
+        document.getElementById("detected").innerHTML = message.data
+  });
+
+  distance_subcriber.subscribe(function(message) {
+        var distance;
+        distance = message.data
+        document.getElementById("distance").innerHTML = message.data
+  });
+
+  setInterval(() => {
+    if(human === 1){
+      document.getElementById("human_detect").style.visibility="visible";
+      document.getElementById("ss").submit();
+    }
+    else{
+      document.getElementById("human_detect").style.visibility="hidden";
+      human = 0;
+    }
+  }, 1000);
+
+</script>
+
+<br>
+<a href="{% url 'set_mode' %}" class="previous">&laquo; Back</a>
+{%endblock%}
